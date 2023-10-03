@@ -1,0 +1,44 @@
+accessibility: Hidden
+↓Init [steps.SimpleStep-1696345808436]: 
+  expression: |
+    '// docker run -d --name ftp -p 21:21 -p 21000-21010:21000-21010 -v ./data:/ftp/alpineftp delfer/alpine-ftp-server
+    // see https://commons.apache.org/proper/commons-net/examples/ftp/FTPClientExample.java
+    
+    var ftp, reply, fis;
+    
+    try {
+    	ftp = new org.apache.commons.net.ftp.FTPClient();
+    	
+    	ftp.connect(''localhost'', 21);
+    	reply = ftp.getReplyCode();
+    	log.info(''reply '' + reply);
+    	
+    	ftp.login(''alpineftp'', ''alpineftp'');
+    	reply = ftp.getReplyCode();
+    	log.info(''reply '' + reply);
+    	
+    	ftp.setFileType(org.apache.commons.net.ftp.FTP.BINARY_FILE_TYPE);
+    	reply = ftp.getReplyCode();
+    	log.info(''reply '' + reply);
+    	
+    	ftp.enterLocalPassiveMode();
+    	reply = ftp.getReplyCode();
+    	log.info(''reply '' + reply);
+    	
+    	fis = new java.io.FileInputStream(file);
+    	ftp.storeFile(''/ftp/alpineftp/'' + new java.io.File(file).getName(), fis);
+    	reply = ftp.getReplyCode();
+    	log.info(''reply '' + reply);
+    } catch (e) {
+    	log.warn(''error: '' + e);
+    }
+    
+    if (fis) {
+    	fis.close();
+    }
+    
+    if (ftp) {
+    	ftp.logout();
+    }'
+↓file [variables.RequestableVariable-1696345328835]: 
+  isFileUpload: true

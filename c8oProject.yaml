@@ -2,4 +2,4 @@
 ↓sampleFTP [core.Project]: 
   comment: Mashup Sequencer project
   ↓void [connectors.SqlConnector]: 🗏 connectors/void.yaml
-  ↓NewSequence [sequences.GenericSequence]: 🗏 sequences/NewSequence.yaml
+  ↓Upload [sequences.GenericSequence]: 🗏 sequences/Upload.yaml
