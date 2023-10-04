@@ -1,5 +1,6 @@
 ↑convertigo: 8.0.0.m006
 ↓sampleFTP [core.Project]: 
-  comment: Mashup Sequencer project
+  comment: FTP sample project
+  version: 1.0
   ↓void [connectors.SqlConnector]: 🗏 connectors/void.yaml
   ↓Upload [sequences.GenericSequence]: 🗏 sequences/Upload.yaml

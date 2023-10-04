@@ -1,44 +1,108 @@
 accessibility: Hidden
+comment: |
+  '<h1>This sequence is used to upload one file on a FTP server.<h1>
+  
+  **outputs**
+  
+  <table>
+  <tr>
+  <th>name</th><th>comment</th>
+  </tr>
+  <tr>
+  <td>success</td><td>true/false</td>
+  </tr>
+  <tr>
+  <td>error (optional)</td><td>Error message.</td>
+  </tr>
+  </table>'
 ↓Init [steps.SimpleStep-1696345808436]: 
   expression: |
     '// docker run -d --name ftp -p 21:21 -p 21000-21010:21000-21010 -v ./data:/ftp/alpineftp delfer/alpine-ftp-server
     // see https://commons.apache.org/proper/commons-net/examples/ftp/FTPClientExample.java
     
-    var ftp, reply, fis;
+    var ftp, ftpReply, reply, fis;
+    var isSuccess = false;
     
     try {
     	ftp = new org.apache.commons.net.ftp.FTPClient();
+    	ftpReply = org.apache.commons.net.ftp.FTPReply;
     	
-    	ftp.connect(''localhost'', 21);
+    	ftp.connect(host, port);
     	reply = ftp.getReplyCode();
     	log.info(''reply '' + reply);
+    	if(!ftpReply.isPositiveCompletion(reply)){
+    		throw "FTP server refused connection.";
+    	}
     	
-    	ftp.login(''alpineftp'', ''alpineftp'');
+    	ftp.login(username, password);
     	reply = ftp.getReplyCode();
     	log.info(''reply '' + reply);
+    	if(!ftpReply.isPositiveCompletion(reply)){
+    		throw "Invalid username or password.";
+    	}
     	
     	ftp.setFileType(org.apache.commons.net.ftp.FTP.BINARY_FILE_TYPE);
     	reply = ftp.getReplyCode();
     	log.info(''reply '' + reply);
+    	if(!ftpReply.isPositiveCompletion(reply)){
+    		throw "Could not set the file type to be transferred.";
+    	}
     	
     	ftp.enterLocalPassiveMode();
     	reply = ftp.getReplyCode();
     	log.info(''reply '' + reply);
+    	if(!ftpReply.isPositiveCompletion(reply)){
+    		throw "Could not set the current data connection mode to Passive.";
+    	}
     	
     	fis = new java.io.FileInputStream(file);
-    	ftp.storeFile(''/ftp/alpineftp/'' + new java.io.File(file).getName(), fis);
+    	ftp.storeFile(destination + new java.io.File(file).getName(), fis);
     	reply = ftp.getReplyCode();
     	log.info(''reply '' + reply);
+    	if(!ftpReply.isPositiveCompletion(reply)){
+    		throw "File transfer failed.";
+    	}
+    	
+    	ftp.logout();
+    	isSuccess = true;
     } catch (e) {
     	log.warn(''error: '' + e);
+    	context.addTextNodeUnderRoot("error", e);
+    } finally {
+    	context.addTextNodeUnderRoot("success", isSuccess);
     }
     
     if (fis) {
-    	fis.close();
+    	try {
+    		fis.close();
+    	} catch (e){}
     }
     
-    if (ftp) {
-    	ftp.logout();
+    if (ftp.isConnected()) {
+    	try {
+    		ftp.logout();
+    		ftp.disconnect();
+    	} catch (e){}
     }'
+↓host [variables.RequestableVariable-1696408077779]: 
+  comment: FTP server host name or IP
+  value: localhost
+↓port [variables.RequestableVariable-1696408292626]: 
+  comment: FTP port number
+  value: 21
+↓username [variables.RequestableVariable-1696407812447]: 
+  comment: FTP user name
+  value: alpineftp
+↓password [variables.RequestableVariable-1696407944782]: 
+  comment: FTP password
+  value: 
+    - ↑ciphered: true
+    - ↑traceable: false
+    - →→: xb1d7bc5880c23f9c8918428ab1e26082
+  visibility: '-1'
+↓destination [variables.RequestableVariable-1696408107900]: 
+  comment: FTP destination folder
+  value: /ftp/alpineftp/
 ↓file [variables.RequestableVariable-1696345328835]: 
+  comment: source file path
   isFileUpload: true
