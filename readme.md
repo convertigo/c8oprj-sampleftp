@@ -43,7 +43,7 @@ For more technical informations : [documentation](./project.md)
 
 ### Upload
 
-<h1>This sequence is used to upload one file on a FTP server.<h1>
+<h1>This sequence is used to upload one file on a FTP server.</h1>
 
 **outputs**
 

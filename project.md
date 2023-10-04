@@ -24,7 +24,7 @@ does nothing
 
 ## ![](https://github.com/convertigo/convertigo/blob/develop/engine/src/com/twinsoft/convertigo/beans/sequences/images/genericsequence_color_16x16.png?raw=true "GenericSequence") Upload
 
-<h1>This sequence is used to upload one file on a FTP server.<h1>
+<h1>This sequence is used to upload one file on a FTP server.</h1>
 
 **outputs**
 
