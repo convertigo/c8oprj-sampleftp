@@ -1,6 +1,6 @@
 accessibility: Hidden
 comment: |
-  '<h1>This sequence is used to upload one file on a FTP server.</h1>
+  '<h1>This sequence is used to obtain a list of file names in a directory (source) or current working directory (source is null).</h1>
   
   **outputs**
   
@@ -9,18 +9,21 @@ comment: |
   <th>name</th><th>comment</th>
   </tr>
   <tr>
+  <td>files with length, array of file (0-n times)</td><td>file names found in FTP server directory.</td>
+  </tr>
+  <tr>
   <td>success</td><td>true/false</td>
   </tr>
   <tr>
-  <td>error (optional)</td><td>Error message.</td>
+  <td>error (0-1 time)</td><td>Error message if any.</td>
   </tr>
   </table>'
-↓Init [steps.SimpleStep-1696496052083]: 
+↓Init [steps.SimpleStep-1696496036279]: 
   expression: |
     '// docker run -d --name ftp -p 21:21 -p 21000-21010:21000-21010 -v ./data:/ftp/alpineftp delfer/alpine-ftp-server
     // see https://commons.apache.org/proper/commons-net/examples/ftp/FTPClientExample.java
     
-    var ftp, ftpReply, fis;
+    var ftp, ftpReply;
     var isSuccess = false;
     
     try {
@@ -47,10 +50,19 @@ comment: |
     		throw "Could not set the current data connection mode to Passive.";
     	}
     	
-    	fis = new java.io.FileInputStream(file);
-    	ftp.storeFile(destination + new java.io.File(file).getName(), fis);
+    	var list = ftp.listNames(source);
     	if(!ftpReply.isPositiveCompletion(ftp.getReplyCode())){
-    		throw "File transfer failed.";
+    		throw "Could not get FTP files list.";
+    	}
+    	
+    	var files = context.addTextNodeUnderRoot("files", "");
+    	files.setAttribute("length", list.length);
+    	files.setAttribute("type", "array");
+    	
+    	for(var i=0; i<list.length; i++){
+    		log.warning("file:"+list[i]);
+    		var file = context.addTextNode(files, "file", source ? list[i].replace(''''+source, '''') : list[i]);
+    		file.setAttribute("type", "string");
     	}
     	
     	ftp.logout();
@@ -62,49 +74,53 @@ comment: |
     	context.addTextNodeUnderRoot("success", isSuccess);
     }
     
-    if (fis) {
-    	try {
-    		fis.close();
-    	} catch (e){}
-    }
-    
     if (ftp && ftp.isConnected()) {
     	try {
     		ftp.logout();
     		ftp.disconnect();
     	} catch (e){}
     }'
-↓host [variables.RequestableVariable-1696496052086]: 
+↓host [variables.RequestableVariable-1696496036282]: 
   comment: FTP server host name or IP
-↓port [variables.RequestableVariable-1696496052089]: 
+↓port [variables.RequestableVariable-1696496036285]: 
   comment: FTP port number
-↓username [variables.RequestableVariable-1696496052092]: 
+↓username [variables.RequestableVariable-1696496036288]: 
   comment: FTP user name
-↓password [variables.RequestableVariable-1696496052095]: 
+↓password [variables.RequestableVariable-1696496036291]: 
   comment: FTP password
   value: 
     - ↑ciphered: true
     - ↑traceable: false
-    - →→: xd8e180806a1c1d83a6255212121ab827
+    - →→: x885ff7e4fb6d209c81fa59d8b6b6205f
   visibility: '-1'
-↓destination [variables.RequestableVariable-1696496052098]: 
-  comment: FTP destination folder
-↓file [variables.RequestableVariable-1696496052101]: 
-  comment: source file path
-  isFileUpload: true
+↓source [variables.RequestableVariable-1696496036294]: 
+  comment: FTP source folder
 ↓Test_Case [core.TestCase]: 
-  ↓host [variables.TestCaseVariable-1696496052105]: 
+  ↓host [variables.TestCaseVariable-1696496036298]: 
     value: localhost
-  ↓port [variables.TestCaseVariable-1696496052108]: 
+  ↓port [variables.TestCaseVariable-1696496036301]: 
     value: 21
-  ↓username [variables.TestCaseVariable-1696496052111]: 
+  ↓username [variables.TestCaseVariable-1696496036304]: 
     value: alpineftp
-  ↓password [variables.TestCaseVariable-1696496052114]: 
+  ↓password [variables.TestCaseVariable-1696496036307]: 
     value: 
       - ↑ciphered: true
       - ↑traceable: false
       - →→: xb1d7bc5880c23f9c8918428ab1e26082
     visibility: '-1'
-  ↓destination [variables.TestCaseVariable-1696496052117]: 
+  ↓source [variables.TestCaseVariable-1696496036310]: 
     value: /ftp/alpineftp/
-  ↓file [variables.TestCaseVariable-1696496052120]: 
+↓Test_Case1 [core.TestCase]: 
+  ↓host [variables.TestCaseVariable-1696496036314]: 
+    value: localhost
+  ↓port [variables.TestCaseVariable-1696496036317]: 
+    value: 21
+  ↓username [variables.TestCaseVariable-1696496036320]: 
+    value: alpineftp
+  ↓password [variables.TestCaseVariable-1696496036323]: 
+    value: 
+      - ↑ciphered: true
+      - ↑traceable: false
+      - →→: xb1d7bc5880c23f9c8918428ab1e26082
+    visibility: '-1'
+  ↓source [variables.TestCaseVariable-1696496036326]: 

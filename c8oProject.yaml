@@ -1,6 +1,8 @@
 ↑convertigo: 8.0.0.m006
 ↓sampleFTP [core.Project]: 
   comment: FTP sample project
-  version: 1.0
+  version: 1.1
   ↓void [connectors.SqlConnector]: 🗏 connectors/void.yaml
+  ↓CheckFile [sequences.GenericSequence]: 🗏 sequences/CheckFile.yaml
+  ↓List [sequences.GenericSequence]: 🗏 sequences/List.yaml
   ↓Upload [sequences.GenericSequence]: 🗏 sequences/Upload.yaml
